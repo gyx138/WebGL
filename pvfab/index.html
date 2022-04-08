@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html lang="en-us">
+
+  <head>
+
+    <meta charset="utf-8">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <title>PV-Semiconductor-Fab-3D</title>
+
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+
+    <link rel="stylesheet" href="TemplateData/style.css">
+
+    <!--<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> -->
+    <link rel="stylesheet" href="w3.css">
+
+    <style>
+      html {
+        font-family: Helvetica, Verdana, Arial, sans-serif;
+      }
+      #fade {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        z-index: 1001;
+        -moz-opacity: 0.8;
+        opacity: 0.8;
+        filter: alpha(opacity=80);
+      }
+
+      #lightbox {
+        color: #FFF;
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        max-width: 90%;
+        margin-left: -640px;
+        margin-top: -25%;
+        border: 8px solid #000;
+        background: #000;
+        z-index: 1002;
+        overflow: visible;
+      }
+    </style>
+
+    <script src="TemplateData/UnityProgress.js"></script>  
+
+	  <script src="pvfabinteraction.js"></script>
+
+    <script src="Build/UnityLoader.js"></script>
+
+    <script>
+
+      var gameInstance = UnityLoader.instantiate("gameContainer", "Build/PV-Semiconductor-Fab-3D_webGL_20-07-16_01.json", {onProgress: UnityProgress});
+
+    </script>
+    
+    <script>
+      document.addEventListener('keydown', e => {
+        if (e.code === 'Escape' || e.keyCode === 27) {
+          e.stopPropagation();
+          lightbox_close();
+        }
+      });
+    </script>
+
+    <script>
+      function exit_fullscreen() {
+        var isInFullScreen = (document.fullscreenElement && document.fullscreenElement !== null) ||
+        (document.webkitFullscreenElement && document.webkitFullscreenElement !== null) ||
+        (document.mozFullScreenElement && document.mozFullScreenElement !== null) ||
+        (document.msFullscreenElement && document.msFullscreenElement !== null);
+
+        if(isInFullScreen) {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+              document.webkitExitFullscreen();
+          } else if (document.mozCancelFullScreen) {
+              document.mozCancelFullScreen();
+          } else if (document.msExitFullscreen) {
+              document.msExitFullscreen();
+          }
+        }
+      }
+
+      function lightbox_open(video_url, video_title, video_subtitle) {
+        // Lightbox doesn't work in fullscreen (;_;)
+        exit_fullscreen();
+
+        document.getElementById("lightbox-video-source").src = video_url;
+
+        document.getElementById("lightbox-video-title").textContent = video_title;
+
+        window.scrollTo(0,0);
+
+        document.getElementById('lightbox').style.display = 'block';
+        document.getElementById('lightbox-video').style.display = 'block';
+        document.getElementById('lightbox-image').style.display = 'none';
+        document.getElementById('fade').style.display = 'block';
+
+        var lightBoxVideo = document.getElementById("lightbox-video");
+        lightBoxVideo.load();
+        lightBoxVideo.play();
+      }
+
+      var lightbox_gallery_slideIndex = 1;
+      
+
+      function plusDivs(n) {
+        showDivs(lightbox_gallery_slideIndex += n);
+      }
+
+      function showDivs(n) {
+        var i;
+        var x = document.getElementsByClassName("lightbox-image-slide");
+        if (n > x.length) {lightbox_gallery_slideIndex = 1}
+        if (n < 1) {lightbox_gallery_slideIndex = x.length} ;
+        for (i = 0; i < x.length; i++) {
+          x[i].style.display = "none";
+        }
+        x[lightbox_gallery_slideIndex-1].style.display = "block";
+      }
+
+      function lightbox_gallery_openJSON(jsonUrl) {
+        var request = new XMLHttpRequest();
+        request.open('GET', jsonUrl);
+        request.responseType = 'json';
+        request.send();
+        request.onload = function () {
+          lightbox_gallery_open(request.response);
+        }
+      }
+
+      function lightbox_gallery_open(gallery_json)
+      {
+        exit_fullscreen();
+
+        window.scrollTo(0,0);
+
+        if(gallery_json == undefined) {
+          console.log("No gallery found, aborting...");
+          return;
+        }
+
+        var imageLightbox = document.getElementById('lightbox-image');
+        while(imageLightbox.hasChildNodes()) {
+          imageLightbox.removeChild(imageLightbox.firstChild);
+        }
+        
+        for(image_url in gallery_json['images']) {
+          var imgElement = document.createElement("img");
+          imgElement.className = "lightbox-image-slide";
+          imgElement.style = "display: block; margin-left: auto; margin-right: auto; max-height:600px; max-width:600px;";
+          imgElement.src = gallery_json['images'][image_url];
+          imageLightbox.appendChild(imgElement);
+        }
+
+        var buttonBackElement = document.createElement("button");
+        buttonBackElement.innerHTML = "❮";
+        buttonBackElement.classList = "w3-button w3-light-grey noselection w3-display-left";
+        buttonBackElement.onclick = function () {
+          plusDivs(-1);
+        }
+        imageLightbox.appendChild(buttonBackElement);
+
+        var buttonForwardElement = document.createElement("button");
+        buttonForwardElement.innerHTML = "❯";
+        buttonForwardElement.classList = "w3-button w3-light-grey noselection w3-display-right";
+        buttonForwardElement.onclick = function () {
+          plusDivs(+1);
+        }
+        imageLightbox.appendChild(buttonForwardElement);
+
+        document.getElementById("lightbox-video-title").textContent = gallery_json['title'];
+        document.getElementById('lightbox').style.display = 'block';
+        document.getElementById('lightbox-video').style.display = 'none';
+        imageLightbox.style.display = 'block';
+        document.getElementById('fade').style.display = 'block';
+
+        lightbox_gallery_slideIndex = 1;
+        showDivs(lightbox_gallery_slideIndex)
+
+      }
+
+      function lightbox_close(){
+        var lightBoxVideo = document.getElementById("lightbox-video");
+        lightBoxVideo.pause();
+
+        document.getElementById('lightbox').style.display = 'none';
+        document.getElementById('fade').style.display = 'none';
+      }
+    </script>
+
+  </head>
+
+  <body>
+
+    <div class="webgl-content">
+
+      <div id="gameContainer" style="width: 1440px; height: 900px"></div>
+
+      <div class="footer">
+
+        <div class="webgl-logo"></div>
+
+        <div class="fullscreen" onclick="gameInstance.SetFullscreen(1)"></div>
+
+        <div class="title">PV-Semiconductor-Fab-3D</div>
+
+      </div>
+
+    </div>
+
+    <div id="lightbox">
+      <p id="lightbox-video-title">Video</p>
+      <div id="lightbox-image" style="width: 1280px;">
+      </div>
+      <video id="lightbox-video" width="1280" controls>
+        <source id="lightbox-video-source" src="#" type="video/mp4" />
+      </video>
+    </div>
+
+    <div id="fade" onclick="lightbox_close()"></div>
+
+  </body>
+
+</html>

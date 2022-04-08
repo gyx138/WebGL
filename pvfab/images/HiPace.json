@@ -1,0 +1,12 @@
+{
+    "title" : "HiPace",
+    "images" : [
+        "images/01-sectional-view.jpg", 
+        "images/02-safety-bearing.jpg", 
+        "images/03-motor.jpg",
+        "images/04-ceramic-ball-bearings.jpg",
+        "images/05-electronic-drive-unit.jpg",
+		"images/06-Stator-Diffuse-Reflection.jpg",
+		"images/07-Rotor-Superposition.jpg"	
+    ]
+}
